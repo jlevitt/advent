@@ -7,31 +7,37 @@ import (
 	"os"
 )
 
-func hasAnyLetterTwice(word string) bool {
-	letters := map[rune]int{}
+type predicate func(string) bool
 
-	for _, letter := range word {
-		count, ok := letters[letter]
+func hasSameLetter(times int) func(string) bool {
+	return func(word string) bool {
+		letters := map[rune]int{}
 
-		if ok {
-			letters[letter] = count + 1
-		} else {
-			letters[letter] = 1
+		for _, letter := range word {
+			count, ok := letters[letter]
+
+			if ok {
+				letters[letter] = count + 1
+			} else {
+				letters[letter] = 1
+			}
 		}
 
-		if letters[letter] == 2 {
-			return true
+		for _, count := range letters {
+			if count == times {
+				return true
+			}
 		}
+
+		return false
 	}
-
-	return false
 }
 
-func countTwos(ids []string) int {
+func countTrues(ids []string, pred predicate) int {
 	count := 0
 
 	for _, id := range ids {
-		if hasAnyLetterTwice(id) {
+		if pred(id) {
 			count++
 		}
 	}
@@ -60,7 +66,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	twos := countTwos(ids)
+	twos := countTrues(ids, hasSameLetter(2))
+	threes := countTrues(ids, hasSameLetter(3))
 
-	fmt.Printf("Final id: %v\n", twos)
+	fmt.Printf("Twos: %v\nThrees: %v\nChecksum: %v\n", twos, threes, twos*threes)
 }
